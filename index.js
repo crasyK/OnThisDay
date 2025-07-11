@@ -3,7 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const server = new McpServer({
-    name: "mcp-OnThisDay",
+    name: "mcp-OnThisDayToday",
     version: "1.0.0"
 });
 
@@ -33,7 +33,7 @@ function parseWikiData(rawContent){
     return cleanContent;
 }
 
-async function getWikipediaOnThisDay({country, random}){
+async function getWikipediaOnThisDayToday({country, random}){
     try {
         const { month, day } = getCurrentDate();
         const language = country || 'en';
@@ -49,7 +49,7 @@ async function getWikipediaOnThisDay({country, random}){
         const data = await response.json();
         let events = data.events || [];
 
-        let responseText = `Wikipedia "On This Day" Events (${language.toUpperCase()})\n`;
+        let responseText = `Wikipedia "On This Day" Events from Today (${language.toUpperCase()})\n`;
         responseText += `===========================================\n\n`;
         
         if (events.length === 0) {
@@ -83,8 +83,8 @@ async function getWikipediaOnThisDay({country, random}){
     }
 }
 
-server.registerTool("wikipedia-onthisday", {
-  title: "Wikipedia On This Day",
+server.registerTool("wikipedia-onthisdaytoday", {
+  title: "Wikipedia On This Day Today",
   description: "Get historical events that happened on this day from Wikipedia's 'On This Day' feed.",
   inputSchema,
 }, getWikipediaOnThisDay);

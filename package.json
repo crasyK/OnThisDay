@@ -1,11 +1,11 @@
 {
-  "name": "mcp-wikipedia-onthisday-server",
+  "name": "mcp-wikipedia-onthisdaytoday-server",
   "version": "1.0.0",
   "type": "module",
   "description": "MCP server for Wikipedia's 'On This Day' historical events feed",
   "main": "index.js",
   "bin": {
-    "mcp-wikipedia-onthisday-server": "index.js"
+    "mcp-wikipedia-onthisdaytoday-server": "index.js"
   },
   "scripts": {
     "start": "node index.js",
@@ -16,10 +16,10 @@
     "wikipedia",
     "history",
     "events",
-    "onthisday",
+    "onthisdaytoday",
     "model-context-protocol"
   ],
-  "author": "Your Name",
+  "author": "crasyK",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.1",
