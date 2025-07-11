@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { parseString } from "xml2js";
 
 const server = new McpServer({
     name: "mcp-OnThisDay",
@@ -12,9 +11,17 @@ const inputSchema = {
     country: z.string().optional().describe("Language code for which the on-this-day events should be checked. For example en(default), de, it, fr etc.")
 };
 
+function getCurrentDate(){
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return { month, day };
+}
+
 function parseWikiData(rawContent){
-    // This function can still be used to clean up the HTML content from the summary
-    return rawContent.replace(/<[^>]*>/g, '') 
+    // More aggressive regex to remove style blocks and other unwanted tags
+    let cleanContent = rawContent.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    cleanContent = cleanContent.replace(/<[^>]*>/g, '') 
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
@@ -22,16 +29,16 @@ function parseWikiData(rawContent){
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ') 
     .trim();
+
+    return cleanContent;
 }
 
 async function getWikipediaOnThisDay({country}){
     try {
-        let apiUrl;
-        if(country && country.trim() !== ''){
-            apiUrl = `https://${country}.wikipedia.org/w/api.php?action=featuredfeed&feed=onthisday&feedformat=atom`;
-        } else {
-            apiUrl = 'https://en.wikipedia.org/w/api.php?action=featuredfeed&feed=onthisday&feedformat=atom';
-        }
+        const { month, day } = getCurrentDate();
+        const language = country || 'en';
+        
+        const apiUrl = `https://api.wikimedia.org/feed/v1/wikipedia/${language}/onthisday/all/${month}/${day}`;
 
         const response = await fetch(apiUrl);
 
@@ -39,34 +46,19 @@ async function getWikipediaOnThisDay({country}){
             throw new Error(`Failed to fetch Wikipedia data: ${response.status}`);
         }
         
-        const xmlText = await response.text();
+        const data = await response.json();
+        const events = data.events || [];
 
-        let entries = [];
-        parseString(xmlText, (err, result) => {
-            if (err) {
-                throw new Error(`Error parsing XML: ${err.message}`);
-            }
-            const feedEntries = result.feed.entry;
-            if (feedEntries) {
-                entries = feedEntries.map(entry => ({
-                    title: entry.title[0],
-                    date: entry.updated[0],
-                    content: parseWikiData(entry.summary[0]._)
-                }));
-            }
-        });
-
-        const language = country || 'en';
         let responseText = `Wikipedia "On This Day" Events (${language.toUpperCase()})\n`;
         responseText += `===========================================\n\n`;
         
-        if (entries.length === 0) {
+        if (events.length === 0) {
             responseText += "No events found for the specified date.";
         } else {
-            entries.forEach((entry, index) => {
-                responseText += `🗓️ ${entry.title}\n`;
-                responseText += `${entry.content}\n`;
-                if (index < entries.length - 1) {
+            events.forEach((event, index) => {
+                responseText += `🗓️ ${event.year}\n`;
+                responseText += `${parseWikiData(event.text)}\n`;
+                if (index < events.length - 1) {
                     responseText += "\n---\n\n";
                 }
             });
