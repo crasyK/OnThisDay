@@ -10,7 +10,8 @@ const server = new McpServer({
 });
 
 const inputSchema = {
-    city: z.string().optional()
+    country: z.string().optional("Language code for which the on-this-day events should be checked. For example en(default), de, it, fr etc.")
+
 };
 
 function getcurrentDate(){
@@ -35,11 +36,15 @@ function parseWikiData(rawContent){
     return cleanContent;
 }
 
-async function getWikipediaOnThisDay(){
+async function getWikipediaOnThisDay({country}){
     try {
         const targetDate = date || getCurrentDate();
 
-        const apiUrl = 'https://en.wikipedia.org/w/api.php?action=featuredfeed&feed=onthisday&feedformat=atom';
+        if(country !== null){
+            const apiUrl = `https://${country}.wikipedia.org/w/api.php?action=featuredfeed&feed=onthisday&feedformat=atom`;
+        }else{
+            const apiUrl = 'https://en.wikipedia.org/w/api.php?action=featuredfeed&feed=onthisday&feedformat=atom';
+        }
 
         const response = await fetch(apiUrl);
 
