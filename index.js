@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const server = new McpServer({
     name: "mcp-OnThisDayToday",
-    version: "1.0.0"
+    version: "1.0.3"
 });
 
 const inputSchema = {
@@ -87,7 +87,7 @@ server.registerTool("wikipedia-onthisdaytoday", {
   title: "Wikipedia On This Day Today",
   description: "Get historical events that happened on this day from Wikipedia's 'On This Day' feed.",
   inputSchema,
-}, getWikipediaOnThisDay);
+}, getWikipediaOnThisDayToday);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

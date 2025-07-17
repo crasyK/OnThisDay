@@ -1,6 +1,6 @@
 {
   "name": "mcp-wikipedia-onthisdaytoday-server",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "MCP server for Wikipedia's 'On This Day' historical events feed",
   "main": "index.js",
